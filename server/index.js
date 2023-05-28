@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import bodyParser from "body-parser";
 import { UniversityRoute } from "./Routes/UniversityRoute.js";
 
 dotenv.config();
@@ -10,8 +9,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/university", UniversityRoute);
 

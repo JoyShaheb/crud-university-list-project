@@ -101,8 +101,9 @@ UniversityRoute.delete("/delete/:id", async (req, res) => {
 
 // test here
 UniversityRoute.post("/test", async (req, res) => {
+  const {name} = req.body;
   try{
-    res.status(200).json({ message: "University created successfully", data: req.body });
+    res.status(200).json({ message: "Test route" });
   }
   catch(err){
     res.status(500).json({ message: "Server Error, please try again later" });
