@@ -97,3 +97,14 @@ UniversityRoute.delete("/delete/:id", async (req, res) => {
     res.status(500).json({ message: "Server Error, please try again later" });
   }
 });
+
+
+// test here
+UniversityRoute.post("/test", async (req, res) => {
+  try{
+    res.status(200).json({ message: "University created successfully", data: req.body });
+  }
+  catch(err){
+    res.status(500).json({ message: "Server Error, please try again later" });
+  }
+})
