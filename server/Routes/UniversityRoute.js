@@ -1,5 +1,36 @@
 import express from "express";
 import { UniversityModel } from "../Model/UniversityModel.js";
+import { S3Client } from "@aws-sdk/client-s3";
+import multer from "multer";
+import multerS3 from "multer-s3";
+import dotenv from "dotenv";
+import { ImageModel } from "../Model/ImageModel.js";
+
+dotenv.config();
+
+const s3 = new S3Client({
+  region: process.env.S3_BUCKET_REGION,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  },
+});
+
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket: process.env.S3_BUCKET_NAME,
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      const fileName = Date.now().toString() + "_" + file.originalname;
+      cb(null, fileName);
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+  }),
+});
+
 export const UniversityRoute = express.Router();
 
 // Get all universities ✅
@@ -98,14 +129,27 @@ UniversityRoute.delete("/delete/:id", async (req, res) => {
   }
 });
 
-
 // test here
-UniversityRoute.post("/test", async (req, res) => {
-  const {name} = req.body;
-  try{
-    res.status(200).json({ message: "Test route" });
+UniversityRoute.post(
+  "/test",
+  upload.single("image"),
+  async (req, res, next) => {
+    const { name } = req?.body;
+
+    try {
+      const newImage = new ImageModel({
+        name: name,
+        image: req?.file?.location,
+      });
+      await newImage.save();
+
+      res.status(200).json({
+        message: `Successfully uploaded 1 files!`,
+        URL_location: req?.file?.location,
+        name: name,
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Server Error, please try again later" });
+    }
   }
-  catch(err){
-    res.status(500).json({ message: "Server Error, please try again later" });
-  }
-})
+);
