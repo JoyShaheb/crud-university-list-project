@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -6,9 +6,32 @@ import {
   MoonIcon,
 } from "@heroicons/react/24/outline";
 import NavItem from "./NavItem";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, themeSwitch } from "../../store";
+import { ThemeTypesEnum } from "../../types/enum";
 
 const Navbar = () => {
+  const dispatch = useDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const theme = useSelector((state: RootState) => state.system.mode);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle(
+      ThemeTypesEnum.DARK,
+      theme === ThemeTypesEnum.DARK
+    );
+  }, [theme]);
+
+  const handleChangeTheme = () =>
+    dispatch(
+      themeSwitch(
+        theme === ThemeTypesEnum.LIGHT
+          ? ThemeTypesEnum.DARK
+          : ThemeTypesEnum.LIGHT
+      )
+    );
+
   return (
     <nav className="bg-gray-800">
       <div className="container mx-auto px-2 sm:px-6 lg:px-8">
@@ -65,9 +88,19 @@ const Navbar = () => {
             <button
               type="button"
               className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+              onClick={handleChangeTheme}
             >
               <MoonIcon
-                className="h-6 w-6"
+                className={`${
+                  theme === ThemeTypesEnum?.LIGHT ? "hidden" : "block"
+                } h-6 w-6`}
+                aria-hidden="true"
+                strokeWidth={1.5}
+              />
+              <SunIcon
+                className={`${
+                  theme === ThemeTypesEnum?.DARK ? "hidden" : "block"
+                } h-6 w-6`}
                 aria-hidden="true"
                 strokeWidth={1.5}
               />
