@@ -17,7 +17,13 @@ const UniversitySchema = new mongoose.Schema({
     default: "",
   },
   totalStudents: { type: Number, required: false, trim: true, default: 0 },
-  faculties: String,
+  faculties: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Faculty",
+      required: false,
+    },
+  ],
 });
 
 export const UniversityModel = mongoose.model("University", UniversitySchema);
