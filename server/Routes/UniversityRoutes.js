@@ -1,8 +1,6 @@
 import express from "express";
-import dotenv from "dotenv";
 import { UniversityModel } from "../Models/UniversityModel.js";
-
-dotenv.config();
+import { upload } from "../Upload/UploadFunction.js";
 
 export const UniversityRoute = express.Router();
 
@@ -51,9 +49,9 @@ UniversityRoute.delete("/delete/:id", async (req, res) => {
 
 // ✅ POST 1 University
 
-UniversityRoute.post("/create", async (req, res) => {
+UniversityRoute.post("/create", upload.single("image"), async (req, res) => {
   const { name, email, totalStudents } = req?.body;
-  // const { location } = req?.files;
+  const { location } = req?.file || "";
   try {
     const findUniversity = await UniversityModel.findOne({ email });
 
@@ -65,11 +63,44 @@ UniversityRoute.post("/create", async (req, res) => {
       name,
       email,
       totalStudents,
-      // image: location,
+      ...(location && { image: location }),
     });
     res.status(200).json({
       message: `University was created successfully`,
       newUniversity,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error, please try again later" });
+  }
+});
+
+// ✅ PUT 1 University by ID
+
+UniversityRoute.put("/update", upload.single("image"), async (req, res) => {
+  const { name, email, totalStudents, _id } = req?.body;
+  const { location } = req?.file || "";
+
+  try {
+    const findEmail = await UniversityModel.findOne({ email });
+
+    if (findEmail) {
+      return res.status(400).json({ message: "email already taken" });
+    }
+
+    const findUniversity = await UniversityModel.findById(_id);
+
+    if (!findUniversity) {
+      return res.status(404).json({ message: "University not found" });
+    }
+
+    const updatedUniversity = await UniversityModel.findByIdAndUpdate(_id, {
+      name,
+      email,
+      totalStudents,
+      ...(location && { image: location }),
+    });
+    res.status(200).json({
+      message: `University was updated successfully`,
     });
   } catch (err) {
     res.status(500).json({ message: "Server Error, please try again later" });
